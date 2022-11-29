@@ -10,6 +10,7 @@ import com.switchfully.eurder.services.mappers.ItemMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -49,7 +50,8 @@ public class ItemService {
     }
 
     public List<ItemDto> getAllItems() {
-        return itemMapper.toDto(itemRepository.getAllItems());
+        List<Item> itemsHighToLowSupply = itemRepository.getAllItems().stream().sorted(Comparator.comparing(Item::getAmount).reversed()).toList();
+        return itemMapper.toDto(itemsHighToLowSupply);
     }
 
     public List<ItemDto> getAllItemsBySuplly(String supply) {

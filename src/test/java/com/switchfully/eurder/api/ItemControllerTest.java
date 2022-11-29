@@ -1,8 +1,6 @@
 package com.switchfully.eurder.api;
 
 import com.switchfully.eurder.api.dtos.ItemDto;
-import com.switchfully.eurder.api.dtos.UserDto;
-import com.switchfully.eurder.domain.Adress;
 import com.switchfully.eurder.domain.Item;
 import com.switchfully.eurder.domain.StockLvl;
 import com.switchfully.eurder.domain.repositories.ItemRepository;
@@ -18,7 +16,6 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -71,11 +68,13 @@ class ItemControllerTest {
         @Test
         void whenGetAllItems() {
             items.save(new Item("9", "Car", "To ride in", 21000, 2));
+            items.save(new Item("2", "phone", "To ride in", 21000, 11));
             List<ItemDto> result = RestAssured.given().port(port).auth().preemptive().basic("1", "pwd").contentType("application/json")
                     .when().get("/stock")
                     .then().statusCode(200).and().extract().as(new TypeRef<List<ItemDto>>() {
                     });
             assertTrue(result.size() > 0);
+            assertSame(StockLvl.STOCK_HIGH, result.get(0).stockLvl());
         }
 
         @Test

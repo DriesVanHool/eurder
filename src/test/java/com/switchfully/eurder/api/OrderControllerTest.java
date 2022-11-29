@@ -1,7 +1,6 @@
 package com.switchfully.eurder.api;
 
 import com.switchfully.eurder.api.dtos.OrderDto;
-import com.switchfully.eurder.domain.Adress;
 import com.switchfully.eurder.domain.Item;
 import com.switchfully.eurder.domain.StockLvl;
 import com.switchfully.eurder.domain.repositories.ItemRepository;
@@ -20,7 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class OrderControllerTest {
