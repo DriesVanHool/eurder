@@ -19,6 +19,15 @@ public class Item {
         this.stockLvl = calculateStockLvl(amount);
     }
 
+    public Item(String id, String name, String description, double price, int amount) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.price = price;
+        this.amount = amount;
+        this.stockLvl = calculateStockLvl(amount);
+    }
+
     private StockLvl calculateStockLvl(int amount) {
         if (amount < 5) return StockLvl.STOCK_LOW;
         if (amount < 10) return StockLvl.STOCK_MEDIUM;

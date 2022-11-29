@@ -9,6 +9,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("stock")
 public class ItemController {
@@ -25,5 +27,17 @@ public class ItemController {
     public ItemDto createItem(@RequestHeader String authorization, @RequestBody CreateItemDto createItemDto) {
         securityService.validateAuthorisation(authorization, Feature.ADD_ITEM);
         return itemService.addItem(createItemDto);
+    }
+
+    @GetMapping()
+    public List<ItemDto> getAllItems(@RequestHeader String authorization) {
+        securityService.validateAuthorisation(authorization, Feature.GET_ITEMS);
+        return itemService.getAllItems();
+    }
+
+    @GetMapping(params = "supply")
+    public List<ItemDto> getAllItemsBySuplly(@RequestParam String supply, @RequestHeader String authorization) {
+        securityService.validateAuthorisation(authorization, Feature.GET_ITEMS);
+        return itemService.getAllItemsBySuplly(supply);
     }
 }

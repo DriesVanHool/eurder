@@ -3,12 +3,15 @@ package com.switchfully.eurder.services;
 import com.switchfully.eurder.api.dtos.CreateItemDto;
 import com.switchfully.eurder.api.dtos.ItemDto;
 import com.switchfully.eurder.domain.Item;
+import com.switchfully.eurder.domain.StockLvl;
 import com.switchfully.eurder.domain.exceptions.InvallidInputException;
 import com.switchfully.eurder.domain.repositories.ItemRepository;
 import com.switchfully.eurder.services.mappers.ItemMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ItemService {
@@ -43,5 +46,19 @@ public class ItemService {
             errors.add("amount");
         }
         return errors;
+    }
+
+    public List<ItemDto> getAllItems() {
+        return itemMapper.toDto(itemRepository.getAllItems());
+    }
+
+    public List<ItemDto> getAllItemsBySuplly(String supply) {
+        StockLvl lvl = switch (supply.toLowerCase()) {
+            case "low" -> StockLvl.STOCK_LOW;
+            case "medium" -> StockLvl.STOCK_MEDIUM;
+            case "high" -> StockLvl.STOCK_HIGH;
+            default -> throw new IllegalArgumentException("You can only filter on \"low\", \"medium\" or \"high\".");
+        };
+        return getAllItems().stream().filter(itemDto -> itemDto.stockLvl() == lvl).collect(Collectors.toList());
     }
 }
