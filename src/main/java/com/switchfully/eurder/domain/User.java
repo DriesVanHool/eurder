@@ -38,6 +38,30 @@ public class User {
         this.role = role;
     }
 
+    public String getId() {
+        return id;
+    }
+
+    public String getFirstname() {
+        return firstname;
+    }
+
+    public String getLastname() {
+        return lastname;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public Adress getAdress() {
+        return adress;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
