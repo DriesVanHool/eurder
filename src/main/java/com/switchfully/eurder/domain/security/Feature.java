@@ -1,5 +1,5 @@
 package com.switchfully.eurder.domain.security;
 
 public enum Feature {
-    GET_CUSTOMERS
+    GET_CUSTOMERS, ADD_ITEM;
 }

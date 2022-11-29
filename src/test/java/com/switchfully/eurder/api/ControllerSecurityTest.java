@@ -40,7 +40,7 @@ class ControllerSecurityTest {
     }
 
     @Test
-    void whenWrongPasword() {
+    void whenWrongPassword() {
         users.save(new User("11", "Wrong", "Password", "wrongpw@gmail.com", "123", new Adress("Straat", "5", "Antwerpen"), "pwd", Role.ADMIN));
         Map<String, String> result = RestAssured.given().port(port).auth().preemptive().basic("11", "xyz")
                 .with().get("users/customers").then().statusCode(403).and().extract().as(new TypeRef<Map<String, String>>() {

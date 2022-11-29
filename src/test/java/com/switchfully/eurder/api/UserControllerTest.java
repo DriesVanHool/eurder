@@ -63,7 +63,7 @@ class UserControllerTest {
                     });
 
             String responseMessage = new JSONObject(result).get("message").toString();
-            assertEquals("The following fields are invalid: firstname  lastname  email  street  house number  city  password ", responseMessage);
+            assertEquals("The following fields are invalid: firstname, lastname, email, street, house number, city, password", responseMessage);
         }
 
         @Test
@@ -82,7 +82,7 @@ class UserControllerTest {
                     });
 
             String responseMessage = new JSONObject(result).get("message").toString();
-            assertEquals("The following fields are invalid: email ", responseMessage);
+            assertEquals("The following fields are invalid: email", responseMessage);
         }
 
         @Test
@@ -104,7 +104,7 @@ class UserControllerTest {
                     });
 
             String responseMessage = new JSONObject(result).get("message").toString();
-            assertEquals("This user allready exists", responseMessage);
+            assertEquals("This user already exists", responseMessage);
         }
 
         @Test
@@ -126,7 +126,7 @@ class UserControllerTest {
                     });
 
             String responseMessage = new JSONObject(result).get("message").toString();
-            assertEquals("This emailadress allready has an account", responseMessage);
+            assertEquals("This emailadress already has an account", responseMessage);
         }
     }
 

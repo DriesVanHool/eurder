@@ -1,5 +1,6 @@
 package com.switchfully.eurder.api;
 
+import com.switchfully.eurder.domain.exceptions.InvallidInputException;
 import com.switchfully.eurder.domain.exceptions.UnknownUserException;
 import com.switchfully.eurder.domain.exceptions.WrongPasswordException;
 import com.switchfully.eurder.domain.exceptions.UnauthorizedException;
@@ -21,6 +22,11 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(IllegalArgumentException.class)
     protected void illegalArgumentException(IllegalArgumentException ex, HttpServletResponse response) throws IOException {
+        response.sendError(HttpStatus.BAD_REQUEST.value(), ex.getMessage());
+    }
+
+    @ExceptionHandler(InvallidInputException.class)
+    protected void invallidInputException(InvallidInputException ex, HttpServletResponse response) throws IOException {
         response.sendError(HttpStatus.BAD_REQUEST.value(), ex.getMessage());
     }
 
