@@ -3,7 +3,7 @@ package com.switchfully.eurder.domain.security;
 import java.util.List;
 
 public enum Role {
-    CUSTOMER(), ADMIN(Feature.GET_CUSTOMERS, Feature.ADD_ITEM, Feature.GET_ITEMS);
+    CUSTOMER(Feature.PLACE_ORDER), ADMIN(Feature.GET_CUSTOMERS, Feature.ADD_ITEM, Feature.GET_ITEMS, Feature.PLACE_ORDER);
 
     private final List<Feature> features;
 

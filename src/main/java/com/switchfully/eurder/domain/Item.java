@@ -7,8 +7,8 @@ public class Item {
     private final String name;
     private final String description;
     private final double price;
-    private final int amount;
-    private final StockLvl stockLvl;
+    private int amount;
+    private StockLvl stockLvl;
 
     public Item(String name, String description, double price, int amount) {
         this.id = UUID.randomUUID().toString();
@@ -56,5 +56,14 @@ public class Item {
 
     public StockLvl getStockLvl() {
         return stockLvl;
+    }
+
+    public void setAmount(int amount) {
+        if (amount < 0) {
+            this.amount = 0;
+        } else {
+            this.amount = amount;
+        }
+        this.stockLvl = calculateStockLvl(this.amount);
     }
 }

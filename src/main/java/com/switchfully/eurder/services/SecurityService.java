@@ -37,13 +37,18 @@ public class SecurityService {
 
     }
 
+    public String getUserId(String authorization) {
+        UsernamePassword usernamePassword = getUseramePassword(authorization);
+        return usernamePassword.getUsername();
+    }
+
     private UsernamePassword getUseramePassword(String authorization) throws UnauthorizedException {
         try {
             String decodedToUsernameAndPassword = new String(Base64.getDecoder().decode(authorization.substring("Basic ".length())));
             String username = decodedToUsernameAndPassword.split(":")[0];
             String password = decodedToUsernameAndPassword.split(":")[1];
             return new UsernamePassword(username, password);
-        }catch (RuntimeException ex){
+        } catch (RuntimeException ex) {
             logger.info("Missing authorization value in header.");
             throw new UnauthorizedException();
         }
