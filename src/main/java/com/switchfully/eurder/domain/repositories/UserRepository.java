@@ -1,10 +1,12 @@
 package com.switchfully.eurder.domain.repositories;
 
+import com.switchfully.eurder.api.dtos.UserDto;
 import com.switchfully.eurder.domain.User;
 import com.switchfully.eurder.domain.security.Role;
 import org.springframework.stereotype.Repository;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -24,5 +26,9 @@ public class UserRepository {
     public User save(User user) {
         userMap.put(user.getId(), user);
         return user;
+    }
+
+    public List<User> getAllUsers() {
+        return userMap.values().stream().toList();
     }
 }

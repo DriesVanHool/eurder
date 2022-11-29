@@ -62,6 +62,10 @@ public class User {
         return adress;
     }
 
+    public Role getRole() {
+        return role;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

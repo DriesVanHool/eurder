@@ -3,7 +3,7 @@ package com.switchfully.eurder.domain.security;
 import java.util.List;
 
 public enum Role {
-    CUSTOMER(), ADMIN();
+    CUSTOMER(), ADMIN(Feature.GET_CUSTOMERS);
 
     private final List<Feature> features;
 
@@ -11,7 +11,7 @@ public enum Role {
         this.features = List.of(features);
     }
 
-    public  boolean hasFeature(Feature feature){
+    public boolean hasFeature(Feature feature) {
         return this.features.contains(feature);
     }
 }
