@@ -1,6 +1,5 @@
 package com.switchfully.eurder.services;
 
-import com.switchfully.eurder.api.dtos.CreateItemDto;
 import com.switchfully.eurder.api.dtos.CreateUserDto;
 import com.switchfully.eurder.api.dtos.UserDto;
 import com.switchfully.eurder.domain.User;

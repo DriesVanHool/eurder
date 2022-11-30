@@ -1,6 +1,5 @@
 package com.switchfully.eurder.api;
 
-import com.switchfully.eurder.api.dtos.UserDto;
 import com.switchfully.eurder.domain.Adress;
 import com.switchfully.eurder.domain.User;
 import com.switchfully.eurder.domain.repositories.UserRepository;
@@ -8,15 +7,11 @@ import com.switchfully.eurder.domain.security.Role;
 import io.restassured.RestAssured;
 import io.restassured.common.mapper.TypeRef;
 import net.minidev.json.JSONObject;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 
-import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

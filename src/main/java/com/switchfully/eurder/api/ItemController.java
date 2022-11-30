@@ -2,6 +2,7 @@ package com.switchfully.eurder.api;
 
 import com.switchfully.eurder.api.dtos.CreateItemDto;
 import com.switchfully.eurder.api.dtos.ItemDto;
+import com.switchfully.eurder.api.dtos.ItemShippingDto;
 import com.switchfully.eurder.domain.security.Feature;
 import com.switchfully.eurder.services.ItemService;
 import com.switchfully.eurder.services.SecurityService;
@@ -45,5 +46,11 @@ public class ItemController {
     public List<ItemDto> getAllItemsBySupply(@RequestParam String supply, @RequestHeader String authorization) {
         securityService.validateAuthorisation(authorization, Feature.GET_ITEMS);
         return itemService.getAllItemsBySupply(supply);
+    }
+
+    @GetMapping(path = "shipToday")
+    public List<ItemShippingDto> getAllItemsToShipToday(@RequestHeader String authorization) {
+        securityService.validateAuthorisation(authorization, Feature.GET_ITEMSSIPPING);
+        return itemService.getAllItemsToShipToday();
     }
 }

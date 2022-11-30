@@ -1,9 +1,15 @@
 package com.switchfully.eurder.api;
 
 import com.switchfully.eurder.api.dtos.ItemDto;
+import com.switchfully.eurder.api.dtos.ItemShippingDto;
+import com.switchfully.eurder.api.dtos.OrderDto;
+import com.switchfully.eurder.domain.Adress;
 import com.switchfully.eurder.domain.Item;
 import com.switchfully.eurder.domain.StockLvl;
+import com.switchfully.eurder.domain.User;
 import com.switchfully.eurder.domain.repositories.ItemRepository;
+import com.switchfully.eurder.domain.repositories.UserRepository;
+import com.switchfully.eurder.domain.security.Role;
 import io.restassured.RestAssured;
 import io.restassured.common.mapper.TypeRef;
 import net.minidev.json.JSONObject;
@@ -14,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -26,6 +33,9 @@ class ItemControllerTest {
     int port;
     @Autowired
     private ItemRepository items;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @DisplayName("Item creation")
     @Nested
@@ -133,6 +143,39 @@ class ItemControllerTest {
             List<Item> listToCheck = items.getAllItems().stream().filter(item -> item.getStockLvl() == StockLvl.STOCK_MEDIUM).toList();
             assertSame(listToCheck.size(), result.size());
             assertSame(StockLvl.STOCK_MEDIUM, result.get(0).stockLvl());
+        }
+
+        @Test
+        void getAllItemsToShippToday() {
+            userRepository.save(new User("11", "Test", "Tester", "test@test.com", "0123456789", new Adress("Street", "number", "City Name"), "pwd", Role.CUSTOMER));
+            items.save(new Item("40", "Laptop", "To type on", 3000, 2));
+            Item itemToShip = items.save(new Item("50", "Phone", "For calling", 2000, 12));
+
+            JSONObject item1 = new JSONObject();
+            JSONObject item2 = new JSONObject();
+            item1.put("itemId", "40");
+            item1.put("amount", "2");
+            item2.put("itemId", "50");
+            item2.put("amount", "1");
+            List<JSONObject> order1 = new ArrayList<>();
+            order1.add(item1);
+            order1.add(item2);
+
+
+            RestAssured.given().port(port).auth().preemptive().basic("11", "pwd").log().all().contentType("application/json")
+                    .body(order1)
+                    .when().post("orders")
+                    .then().statusCode(201).extract().body().as(OrderDto.class);
+
+
+            List<ItemShippingDto> result = RestAssured.given().port(port).auth().preemptive().basic("1", "pwd").contentType("application/json")
+                    .when().get("stock/shipToday")
+                    .then().statusCode(200).and().extract().as(new TypeRef<List<ItemShippingDto>>() {
+                    });
+
+            List<Item> listToCheck = items.getAllItems().stream().filter(item -> item.getStockLvl() == StockLvl.STOCK_MEDIUM).toList();
+            assertEquals(1, result.size());
+            assertEquals(result.get(0).itemGroup().getItemId(), itemToShip.getId());
         }
 
     }

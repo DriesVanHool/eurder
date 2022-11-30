@@ -1,6 +1,7 @@
 package com.switchfully.eurder.services.mappers;
 
 import com.switchfully.eurder.api.dtos.ItemDto;
+import com.switchfully.eurder.api.dtos.ItemShippingDto;
 import com.switchfully.eurder.domain.Item;
 import org.springframework.stereotype.Component;
 
@@ -16,4 +17,6 @@ public class ItemMapper {
     public List<ItemDto> toDto(List<Item> items) {
         return items.stream().map(this::toDto).collect(Collectors.toList());
     }
+
+
 }

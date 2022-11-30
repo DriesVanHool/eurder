@@ -38,8 +38,13 @@ public class OrderService {
         return orderMapper.toDto(orderRepository.save(order));
     }
 
+    public TotalOrderReportDto getOrderReport(String userId) {
+        List<OrderReportDto> orderReports = reportMapper.todDto(getOrdersByUserId(userId));
+        double totalPrice = orderReports.stream().mapToDouble(OrderReportDto::orderPrice).sum();
+        return new TotalOrderReportDto(orderReports, totalPrice);
+    }
 
-    private List<ItemGroup> getListOfItemGroups(List<CreateItemGroupDto> createItemGroupDtos) {
+    private List<ItemGroup> getListOfItemGroups(List<CreateItemGroupDto> createItemGroupDtos) throws NoSuchElementException {
         List<ItemGroup> itemGroups = new ArrayList<>();
         LocalDate shippingDate;
 
@@ -49,17 +54,13 @@ public class OrderService {
             item.setAmount(item.getAmount() - groupItem.amount());
             if (item.getAmount() == 0) shippingDate = shippingDate.plusDays(DAYS_TO_ADD);
 
-            itemGroups.add(new ItemGroup(item.getId(), groupItem.amount(), item.getPrice(), shippingDate));
+            itemGroups.add(new ItemGroup(item.getId(), item.getName(), groupItem.amount(), item.getPrice(), shippingDate));
         }
 
         return itemGroups;
     }
 
-
-    public TotalOrderReportDto getOrderReport(String userId) {
-        List<Order> userOrders = orderRepository.getOrders().stream().filter(order -> order.getCustomerId().equals(userId)).toList();
-        List<OrderReportDto> orderReports = reportMapper.todDto(userOrders);
-        Double totalPrice = orderReports.stream().mapToDouble(OrderReportDto::orderPrice).sum();
-        return new TotalOrderReportDto(orderReports, totalPrice);
+    public List<Order> getOrdersByUserId(String id) {
+        return orderRepository.getOrders().stream().filter(order -> order.getCustomerId().equals(id)).toList();
     }
 }

@@ -2,27 +2,33 @@ package com.switchfully.eurder.services;
 
 import com.switchfully.eurder.api.dtos.CreateItemDto;
 import com.switchfully.eurder.api.dtos.ItemDto;
-import com.switchfully.eurder.domain.Item;
-import com.switchfully.eurder.domain.StockLvl;
+import com.switchfully.eurder.api.dtos.ItemShippingDto;
+import com.switchfully.eurder.domain.*;
 import com.switchfully.eurder.domain.exceptions.InvallidInputException;
 import com.switchfully.eurder.domain.repositories.ItemRepository;
+import com.switchfully.eurder.domain.repositories.OrderRepository;
+import com.switchfully.eurder.domain.repositories.UserRepository;
 import com.switchfully.eurder.services.mappers.ItemMapper;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.NoSuchElementException;
+import java.time.LocalDate;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 public class ItemService {
 
     ItemRepository itemRepository;
+
+    OrderRepository orderRepository;
+
+    UserRepository userRepository;
     ItemMapper itemMapper;
 
-    public ItemService(ItemRepository itemRepository, ItemMapper itemMapper) {
+    public ItemService(ItemRepository itemRepository, OrderRepository orderRepository, UserRepository userRepository, ItemMapper itemMapper) {
         this.itemRepository = itemRepository;
+        this.orderRepository = orderRepository;
+        this.userRepository = userRepository;
         this.itemMapper = itemMapper;
     }
 
@@ -35,7 +41,7 @@ public class ItemService {
 
     public ItemDto updateItem(String id, CreateItemDto createItemDto) throws InvallidInputException {
         ArrayList<String> errors = validateUserInput(createItemDto);
-        if (itemRepository.getItemById(id).isEmpty()) throw new NoSuchElementException("No item exists with id :" + id);
+        if (validateItemId(id)) throw new NoSuchElementException("No item exists with id :" + id);
         if (errors.size() > 0) throw new InvallidInputException(errors);
         Item item = new Item(id, createItemDto.name(), createItemDto.description(), createItemDto.price(), createItemDto.amount());
         return itemMapper.toDto(itemRepository.save(item));
@@ -58,10 +64,38 @@ public class ItemService {
         return errors;
     }
 
+    public boolean validateItemId(String id) {
+        return itemRepository.getItemById(id).isEmpty();
+    }
+
     public List<ItemDto> getAllItems() {
         List<Item> itemsHighToLowSupply = itemRepository.getAllItems().stream().sorted(Comparator.comparing(Item::getAmount).reversed()).toList();
         return itemMapper.toDto(itemsHighToLowSupply);
     }
+
+
+    public List<ItemShippingDto> getAllItemsToShipToday() {
+        return getAllItemsToShip().stream().filter(itemShippingDto -> itemShippingDto.itemGroup().getShippingDate().equals(LocalDate.now())).toList();
+    }
+
+    public List<ItemShippingDto> getAllItemsToShip() {
+        List<ItemShippingDto> itemShippings = new ArrayList<>();
+
+        for (Order order : orderRepository.getOrders()) {
+            Optional<User> user = userRepository.getUserById(order.getCustomerId());
+            Adress adress;
+            if (user.isEmpty()) {
+                adress = null;
+            } else {
+                adress = user.get().getAdress();
+            }
+            for (ItemGroup itemGroup : order.getItemGroups()) {
+                itemShippings.add(new ItemShippingDto(itemGroup, adress));
+            }
+        }
+        return itemShippings;
+    }
+
 
     public List<ItemDto> getAllItemsBySupply(String supply) {
         StockLvl lvl = switch (supply.toLowerCase()) {
@@ -72,4 +106,5 @@ public class ItemService {
         };
         return getAllItems().stream().filter(itemDto -> itemDto.stockLvl() == lvl).collect(Collectors.toList());
     }
+
 }

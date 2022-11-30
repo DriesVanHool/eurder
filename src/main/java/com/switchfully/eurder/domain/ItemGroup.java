@@ -4,13 +4,15 @@ import java.time.LocalDate;
 
 public class ItemGroup {
     private final String itemId;
+    private final String itemName;
     private final int amount;
     private final double buyPrice;
     private final LocalDate shippingDate;
 
 
-    public ItemGroup(String itemId, int amount, double buyPrice, LocalDate shippingDate) {
+    public ItemGroup(String itemId, String itemName, int amount, double buyPrice, LocalDate shippingDate) {
         this.itemId = itemId;
+        this.itemName = itemName;
         this.amount = amount;
         this.buyPrice = buyPrice;
         this.shippingDate = shippingDate;
@@ -18,6 +20,10 @@ public class ItemGroup {
 
     public String getItemId() {
         return itemId;
+    }
+
+    public String getItemName() {
+        return itemName;
     }
 
     public int getAmount() {
