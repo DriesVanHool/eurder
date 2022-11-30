@@ -2,12 +2,15 @@ package com.switchfully.eurder.services;
 
 import com.switchfully.eurder.api.dtos.CreateItemGroupDto;
 import com.switchfully.eurder.api.dtos.OrderDto;
+import com.switchfully.eurder.api.dtos.OrderReportDto;
+import com.switchfully.eurder.api.dtos.TotalOrderReportDto;
 import com.switchfully.eurder.domain.Item;
 import com.switchfully.eurder.domain.ItemGroup;
 import com.switchfully.eurder.domain.Order;
 import com.switchfully.eurder.domain.repositories.ItemRepository;
 import com.switchfully.eurder.domain.repositories.OrderRepository;
 import com.switchfully.eurder.services.mappers.OrderMapper;
+import com.switchfully.eurder.services.mappers.ReportMapper;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -21,11 +24,13 @@ public class OrderService {
     OrderRepository orderRepository;
     ItemRepository itemRepository;
     OrderMapper orderMapper;
+    ReportMapper reportMapper;
 
-    public OrderService(OrderRepository orderRepository, ItemRepository itemRepository, OrderMapper orderMapper) {
+    public OrderService(OrderRepository orderRepository, ItemRepository itemRepository, OrderMapper orderMapper, ReportMapper reportMapper) {
         this.orderRepository = orderRepository;
         this.itemRepository = itemRepository;
         this.orderMapper = orderMapper;
+        this.reportMapper = reportMapper;
     }
 
     public OrderDto placeOrder(List<CreateItemGroupDto> createItemGroupDtos, String userId) {
@@ -51,4 +56,10 @@ public class OrderService {
     }
 
 
+    public TotalOrderReportDto getOrderReport(String userId) {
+        List<Order> userOrders = orderRepository.getOrders().stream().filter(order -> order.getCustomerId().equals(userId)).toList();
+        List<OrderReportDto> orderReports = reportMapper.todDto(userOrders);
+        Double totalPrice = orderReports.stream().mapToDouble(OrderReportDto::orderPrice).sum();
+        return new TotalOrderReportDto(orderReports, totalPrice);
+    }
 }

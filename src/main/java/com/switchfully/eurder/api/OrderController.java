@@ -2,6 +2,7 @@ package com.switchfully.eurder.api;
 
 import com.switchfully.eurder.api.dtos.CreateItemGroupDto;
 import com.switchfully.eurder.api.dtos.OrderDto;
+import com.switchfully.eurder.api.dtos.TotalOrderReportDto;
 import com.switchfully.eurder.domain.security.Feature;
 import com.switchfully.eurder.services.OrderService;
 import com.switchfully.eurder.services.SecurityService;
@@ -27,5 +28,11 @@ public class OrderController {
     public OrderDto createItem(@RequestHeader String authorization, @RequestBody List<CreateItemGroupDto> createItemGroupDtos) {
         securityService.validateAuthorisation(authorization, Feature.PLACE_ORDER);
         return orderService.placeOrder(createItemGroupDtos, securityService.getUserId(authorization));
+    }
+
+    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    public TotalOrderReportDto getOrderReport(@RequestHeader String authorization) {
+        securityService.validateAuthorisation(authorization, Feature.GET_ORDER_REPORT);
+        return orderService.getOrderReport(securityService.getUserId(authorization));
     }
 }

@@ -17,7 +17,15 @@ public class Order {
         this.itemGroups = orderGroups;
     }
 
+    public String getId() {
+        return id;
+    }
+
     public List<ItemGroup> getItemGroups() {
         return itemGroups;
+    }
+
+    public String getCustomerId() {
+        return customerId;
     }
 }

@@ -1,10 +1,15 @@
 package com.switchfully.eurder.api;
 
 import com.switchfully.eurder.api.dtos.OrderDto;
+import com.switchfully.eurder.api.dtos.TotalOrderReportDto;
+import com.switchfully.eurder.domain.Adress;
 import com.switchfully.eurder.domain.Item;
 import com.switchfully.eurder.domain.StockLvl;
+import com.switchfully.eurder.domain.User;
 import com.switchfully.eurder.domain.repositories.ItemRepository;
 import com.switchfully.eurder.domain.repositories.OrderRepository;
+import com.switchfully.eurder.domain.repositories.UserRepository;
+import com.switchfully.eurder.domain.security.Role;
 import io.restassured.RestAssured;
 import io.restassured.common.mapper.TypeRef;
 import net.minidev.json.JSONObject;
@@ -27,7 +32,10 @@ class OrderControllerTest {
     int port;
 
     @Autowired
-    private OrderRepository orderRepository;
+    private OrderRepository orders;
+
+    @Autowired
+    private UserRepository users;
 
     @Autowired
     private ItemRepository items;
@@ -73,9 +81,48 @@ class OrderControllerTest {
                 .when().post("orders")
                 .then().statusCode(400).extract().body().as(new TypeRef<Map<String, String>>() {
                 });
-        String responseMessage = result.get("message").toString();
+        String responseMessage = result.get("message");
 
         assertEquals("No item exists with id :xyz", responseMessage);
 
+    }
+
+
+    @Test
+    void whenGettingOrderReport() {
+        users.save(new User("10", "Test", "Tester", "test@test.com", "0123456789", new Adress("Street", "number", "City Name"), "pwd", Role.CUSTOMER));
+        items.save(new Item("20", "Laptop", "To type on", 3000, 2));
+        items.save(new Item("30", "Phone", "For calling", 2000, 12));
+
+        JSONObject item1 = new JSONObject();
+        JSONObject item2 = new JSONObject();
+        item1.put("itemId", "20");
+        item1.put("amount", "1");
+        item2.put("itemId", "30");
+        item2.put("amount", "3");
+        List<JSONObject> order1 = new ArrayList<>();
+        order1.add(item1);
+        order1.add(item2);
+
+        List<JSONObject> order2 = new ArrayList<>();
+        order1.add(item2);
+
+        RestAssured.given().port(port).auth().preemptive().basic("10", "pwd").log().all().contentType("application/json")
+                .body(order1)
+                .when().post("orders")
+                .then().statusCode(201).extract().body().as(OrderDto.class);
+        RestAssured.given().port(port).auth().preemptive().basic("10", "pwd").log().all().contentType("application/json")
+                .body(order2)
+                .when().post("orders")
+                .then().statusCode(201).extract().body().as(OrderDto.class);
+
+
+        TotalOrderReportDto result = RestAssured.given().port(port).auth().preemptive().basic("10", "pwd").log().all().contentType("application/json")
+                .body(order2)
+                .when().get("orders")
+                .then().statusCode(200).extract().body().as(TotalOrderReportDto.class);
+
+        assertEquals("Phone", result.orders().get(0).itemGroups().get(1).name());
+        assertEquals(15000, result.totalPrice());
     }
 }

@@ -14,4 +14,8 @@ public class OrderRepository {
         orders.add(order);
         return order;
     }
+
+    public List<Order> getOrders() {
+        return orders;
+    }
 }
