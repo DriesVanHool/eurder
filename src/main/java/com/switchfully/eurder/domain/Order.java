@@ -14,6 +14,12 @@ public class Order {
         this.itemGroups = orderGroups;
     }
 
+    public Order(String id, String customerId, List<ItemGroup> itemGroups) {
+        this.id = id;
+        this.customerId = customerId;
+        this.itemGroups = itemGroups;
+    }
+
     public String getId() {
         return id;
     }

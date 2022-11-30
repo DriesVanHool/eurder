@@ -35,4 +35,11 @@ public class OrderController {
         securityService.validateAuthorisation(authorization, Feature.GET_ORDER_REPORT);
         return orderService.getOrderReport(securityService.getUserId(authorization));
     }
+
+    @PostMapping(path = "{orderId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseStatus(HttpStatus.CREATED)
+    public OrderDto reorderOrder(@RequestHeader String authorization, @PathVariable String orderId) {
+        securityService.validateAuthorisation(authorization, Feature.PLACE_ORDER);
+        return orderService.reorderOrder(orderId, securityService.getUserId(authorization));
+    }
 }

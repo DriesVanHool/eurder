@@ -1,11 +1,9 @@
 package com.switchfully.eurder.api;
 
+import com.switchfully.eurder.api.dtos.ItemShippingDto;
 import com.switchfully.eurder.api.dtos.OrderDto;
 import com.switchfully.eurder.api.dtos.TotalOrderReportDto;
-import com.switchfully.eurder.domain.Adress;
-import com.switchfully.eurder.domain.Item;
-import com.switchfully.eurder.domain.StockLvl;
-import com.switchfully.eurder.domain.User;
+import com.switchfully.eurder.domain.*;
 import com.switchfully.eurder.domain.repositories.ItemRepository;
 import com.switchfully.eurder.domain.repositories.OrderRepository;
 import com.switchfully.eurder.domain.repositories.UserRepository;
@@ -25,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class OrderControllerTest {
@@ -63,7 +62,7 @@ class OrderControllerTest {
 
         Assertions.assertEquals(7500, result.totalPrice());
         Assertions.assertEquals(LocalDate.now().plusDays(7), result.itemGroups().get(0).shippingDate());
-        Assertions.assertEquals(LocalDate.now(), result.itemGroups().get(1).shippingDate());
+        Assertions.assertEquals(LocalDate.now().plusDays(1), result.itemGroups().get(1).shippingDate());
         Assertions.assertEquals(1, itemTocheck2.getAmount());
         Assertions.assertEquals(StockLvl.STOCK_LOW, itemTocheck2.getStockLvl());
     }
@@ -124,5 +123,50 @@ class OrderControllerTest {
 
         assertEquals("Phone", result.orders().get(0).itemGroups().get(1).name());
         assertEquals(15000, result.totalPrice());
+    }
+
+    @Test
+    void whenReorderingAnOrderAsAUser() {
+        Item itemNotToShip = items.save(new Item("150", "Laptop", "To type on", 3000, 2));
+        Item itemToShip = items.save(new Item("250", "Phone", "For calling", 2000, 12));
+
+        ItemGroup itemGroup1 = new ItemGroup(itemNotToShip.getId(), itemNotToShip.getName(), 2, itemNotToShip.getPrice(), LocalDate.now().plusDays(7));
+        ItemGroup itemGroup2 = new ItemGroup(itemToShip.getId(), itemToShip.getName(), 1, itemToShip.getPrice(), LocalDate.now());
+        orders.save(new Order("99", "10", List.of(itemGroup1, itemGroup2)));
+
+
+        OrderDto result = RestAssured.given().port(port).auth().preemptive().basic("10", "pwd").log().all().contentType("application/json")
+                .when().post("orders/99")
+                .then().statusCode(201).extract().body().as(OrderDto.class);
+
+        assertEquals(2, result.itemGroups().size());
+        assertEquals("250", result.itemGroups().get(1).itemId());
+    }
+
+    @Test
+    void whenReorderingAnOrderAsAWrongUser() {
+        Item itemNotToShip = items.save(new Item("150", "Laptop", "To type on", 3000, 2));
+        Item itemToShip = items.save(new Item("250", "Phone", "For calling", 2000, 12));
+
+        ItemGroup itemGroup1 = new ItemGroup(itemNotToShip.getId(), itemNotToShip.getName(), 2, itemNotToShip.getPrice(), LocalDate.now().plusDays(7));
+        ItemGroup itemGroup2 = new ItemGroup(itemToShip.getId(), itemToShip.getName(), 1, itemToShip.getPrice(), LocalDate.now());
+        orders.save(new Order("99", "10", List.of(itemGroup1, itemGroup2)));
+
+
+        JSONObject result = RestAssured.given().port(port).auth().preemptive().basic("11", "pwd").log().all().contentType("application/json")
+                .when().post("orders/99")
+                .then().statusCode(403).extract().body().as(JSONObject.class);
+
+        assertEquals("Unauthorized", result.get("message"));
+    }
+
+    @Test
+    void whenReOrderingANotExistingOrder() {
+
+        JSONObject result = RestAssured.given().port(port).auth().preemptive().basic("10", "pwd").log().all().contentType("application/json")
+                .when().post("orders/98")
+                .then().statusCode(400).extract().body().as(JSONObject.class);
+
+        assertEquals("No order found with id: 98", result.get("message"));
     }
 }
