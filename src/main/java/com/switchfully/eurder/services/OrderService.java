@@ -17,6 +17,7 @@ import java.util.NoSuchElementException;
 
 @Service
 public class OrderService {
+    public static final int DAYS_TO_ADD = 7;
     OrderRepository orderRepository;
     ItemRepository itemRepository;
     OrderMapper orderMapper;
@@ -28,9 +29,7 @@ public class OrderService {
     }
 
     public OrderDto placeOrder(List<CreateItemGroupDto> createItemGroupDtos, String userId) {
-
         Order order = new Order(userId, getListOfItemGroups(createItemGroupDtos));
-
         return orderMapper.toDto(orderRepository.save(order));
     }
 
@@ -42,8 +41,9 @@ public class OrderService {
         for (CreateItemGroupDto groupItem : createItemGroupDtos) {
             shippingDate = LocalDate.now();
             Item item = itemRepository.getItemById(groupItem.itemId()).orElseThrow(() -> new NoSuchElementException("No item exists with id :" + groupItem.itemId()));
-            if (item.getAmount() < groupItem.amount()) shippingDate = shippingDate.plusDays(7);
             item.setAmount(item.getAmount() - groupItem.amount());
+            if (item.getAmount() == 0) shippingDate = shippingDate.plusDays(DAYS_TO_ADD);
+
             itemGroups.add(new ItemGroup(item.getId(), groupItem.amount(), item.getPrice(), shippingDate));
         }
 

@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 @Service
@@ -29,6 +30,14 @@ public class ItemService {
         ArrayList<String> errors = validateUserInput(createItemDto);
         if (errors.size() > 0) throw new InvallidInputException(errors);
         Item item = new Item(createItemDto.name(), createItemDto.description(), createItemDto.price(), createItemDto.amount());
+        return itemMapper.toDto(itemRepository.save(item));
+    }
+
+    public ItemDto updateItem(String id, CreateItemDto createItemDto) throws InvallidInputException {
+        ArrayList<String> errors = validateUserInput(createItemDto);
+        if (itemRepository.getItemById(id).isEmpty()) throw new NoSuchElementException("No item exists with id :" + id);
+        if (errors.size() > 0) throw new InvallidInputException(errors);
+        Item item = new Item(id, createItemDto.name(), createItemDto.description(), createItemDto.price(), createItemDto.amount());
         return itemMapper.toDto(itemRepository.save(item));
     }
 
@@ -54,7 +63,7 @@ public class ItemService {
         return itemMapper.toDto(itemsHighToLowSupply);
     }
 
-    public List<ItemDto> getAllItemsBySuplly(String supply) {
+    public List<ItemDto> getAllItemsBySupply(String supply) {
         StockLvl lvl = switch (supply.toLowerCase()) {
             case "low" -> StockLvl.STOCK_LOW;
             case "medium" -> StockLvl.STOCK_MEDIUM;

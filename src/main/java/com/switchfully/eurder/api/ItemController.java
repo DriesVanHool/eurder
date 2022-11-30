@@ -29,6 +29,12 @@ public class ItemController {
         return itemService.addItem(createItemDto);
     }
 
+    @PutMapping(path = "{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ItemDto updateItem(@PathVariable String id, @RequestHeader String authorization, @RequestBody CreateItemDto createItemDto) {
+        securityService.validateAuthorisation(authorization, Feature.UPDATE_ITEM);
+        return itemService.updateItem(id, createItemDto);
+    }
+
     @GetMapping()
     public List<ItemDto> getAllItems(@RequestHeader String authorization) {
         securityService.validateAuthorisation(authorization, Feature.GET_ITEMS);
@@ -36,8 +42,8 @@ public class ItemController {
     }
 
     @GetMapping(params = "supply")
-    public List<ItemDto> getAllItemsBySuplly(@RequestParam String supply, @RequestHeader String authorization) {
+    public List<ItemDto> getAllItemsBySupply(@RequestParam String supply, @RequestHeader String authorization) {
         securityService.validateAuthorisation(authorization, Feature.GET_ITEMS);
-        return itemService.getAllItemsBySuplly(supply);
+        return itemService.getAllItemsBySupply(supply);
     }
 }

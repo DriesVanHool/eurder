@@ -60,6 +60,37 @@ class ItemControllerTest {
             assertEquals("The following fields are invalid: name, description, price, amount", responseMessage);
         }
 
+        @Test
+        void givenAllInput_whenUpdatingAnItem_thenResultEquals() {
+            Item itemToCheck = items.save(new Item("1000", "Laptop", "A portable computer", 2500, 3));
+            JSONObject requestParams = new JSONObject();
+            requestParams.put("name", "Laptop");
+            requestParams.put("description", "A foldable computer");
+            requestParams.put("price", "2000");
+            requestParams.put("amount", "5");
+
+            ItemDto result = RestAssured.given().port(port).auth().preemptive().basic("1", "pwd").contentType("application/json").body(requestParams)
+                    .when().put("/stock/1000")
+                    .then().statusCode(200).and().extract().as(ItemDto.class);
+            assertEquals("A foldable computer", result.description());
+            assertEquals(5, result.amount());
+            assertEquals(1, items.getAllItems().stream().filter(item -> item.getId().equals("1000")).count());
+        }
+
+        @Test
+        void givenANonExistingItemId_whenUpdatingAnItem_thenResultEquals() {
+            JSONObject requestParams = new JSONObject();
+            requestParams.put("name", "");
+            requestParams.put("description", "");
+            requestParams.put("price", "");
+            requestParams.put("amount", "");
+
+            JSONObject result = RestAssured.given().port(port).auth().preemptive().basic("1", "pwd").contentType("application/json").body(requestParams)
+                    .when().put("/stock/zyx")
+                    .then().statusCode(400).and().extract().as(JSONObject.class);
+            assertEquals("No item exists with id :zyx", result.get("message").toString());
+        }
+
     }
 
     @DisplayName("View items")
