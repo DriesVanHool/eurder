@@ -2,7 +2,6 @@ package com.switchfully.eurder.api;
 
 import com.switchfully.eurder.api.dtos.ItemDto;
 import com.switchfully.eurder.api.dtos.ItemShippingDto;
-import com.switchfully.eurder.api.dtos.OrderDto;
 import com.switchfully.eurder.domain.*;
 import com.switchfully.eurder.domain.repositories.ItemRepository;
 import com.switchfully.eurder.domain.repositories.OrderRepository;
@@ -19,7 +18,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
