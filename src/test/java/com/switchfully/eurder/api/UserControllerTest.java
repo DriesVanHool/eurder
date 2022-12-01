@@ -28,7 +28,7 @@ class UserControllerTest {
     int port;
     @Autowired
     private UserRepository users;
-    
+
 
     @DisplayName("User creation")
     @Nested
@@ -56,16 +56,20 @@ class UserControllerTest {
             requestParams.put("lastname", "");
             requestParams.put("email", "");
             requestParams.put("phoneNumber", "");
-            requestParams.put("adress", new Adress("", "", ""));
+            requestParams.put("adress", null);
             requestParams.put("password", "");
 
-            Map<String, String> result = RestAssured.given().port(port).contentType("application/json").body(requestParams)
+            JSONObject result = RestAssured.given().port(port).contentType("application/json").body(requestParams)
                     .when().post("/users")
-                    .then().statusCode(400).and().extract().as(new TypeRef<Map<String, String>>() {
-                    });
+                    .then().statusCode(400).and().extract().as(JSONObject.class);
 
-            String responseMessage = new JSONObject(result).get("message").toString();
-            assertEquals("The following fields are invalid: firstname, lastname, email, street, house number, city, password", responseMessage);
+
+            assertEquals("Firstname needs to be filled in", result.get("firstname"));
+            assertEquals("Password needs to be filled in", result.get("password"));
+            assertEquals("Phonenumber needs to be filled in", result.get("phoneNumber"));
+            assertEquals("Adress needs to be filled in", result.get("adress"));
+            assertEquals("Email needs to be filled in", result.get("email"));
+            assertEquals("Lastname needs to be filled in", result.get("lastname"));
         }
 
         @Test
@@ -78,13 +82,11 @@ class UserControllerTest {
             requestParams.put("adress", new Adress("Street", "number", "City Name"));
             requestParams.put("password", "pwd");
 
-            Map<String, String> result = RestAssured.given().port(port).contentType("application/json").body(requestParams)
+            JSONObject result = RestAssured.given().port(port).contentType("application/json").body(requestParams)
                     .when().post("/users")
-                    .then().statusCode(400).and().extract().as(new TypeRef<Map<String, String>>() {
-                    });
+                    .then().statusCode(400).and().extract().as(JSONObject.class);
 
-            String responseMessage = new JSONObject(result).get("message").toString();
-            assertEquals("The following fields are invalid: email", responseMessage);
+            assertEquals("Email is not valid", result.get("email"));
         }
 
         @Test
@@ -122,13 +124,11 @@ class UserControllerTest {
             requestParams.put("password", "pwd");
 
 
-            Map<String, String> result = RestAssured.given().port(port).contentType("application/json").body(requestParams)
+            JSONObject result = RestAssured.given().port(port).contentType("application/json").body(requestParams)
                     .when().post("/users")
-                    .then().statusCode(400).and().extract().as(new TypeRef<Map<String, String>>() {
-                    });
+                    .then().statusCode(400).and().extract().as(JSONObject.class);
 
-            String responseMessage = new JSONObject(result).get("message").toString();
-            assertEquals("This emailadress already has an account", responseMessage);
+            assertEquals("This emailadress already has an account", result.get("message"));
         }
     }
 
