@@ -21,7 +21,7 @@ import java.util.NoSuchElementException;
 
 @Service
 public class OrderService {
-    public static final int DAYS_TO_ADD = 7;
+/*    public static final int DAYS_TO_ADD = 7;
     OrderRepository orderRepository;
     ItemRepository itemRepository;
     OrderMapper orderMapper;
@@ -76,5 +76,5 @@ public class OrderService {
 
     public List<Order> getOrdersByUserId(String id) {
         return orderRepository.getOrders().stream().filter(order -> order.getCustomerId().equals(id)).toList();
-    }
+    }*/
 }

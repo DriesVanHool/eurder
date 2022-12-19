@@ -1,17 +1,37 @@
 package com.switchfully.eurder.domain.security;
 
+import javax.persistence.*;
 import java.util.List;
 
-public enum Role {
-    CUSTOMER(Feature.PLACE_ORDER, Feature.GET_ORDER_REPORT), ADMIN(Feature.GET_CUSTOMERS, Feature.ADD_ITEM, Feature.GET_ITEMS, Feature.PLACE_ORDER, Feature.UPDATE_ITEM, Feature.GET_ORDER_REPORT, Feature.GET_ITEMSSIPPING);
+@Entity
+@Table(name = "role")
+public class Role {
 
-    private final List<Feature> features;
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "role_seq")
+    @SequenceGenerator(name = "role_seq", sequenceName = "role_seq", allocationSize = 1)
+    private int id;
 
-    Role(Feature... features) {
-        this.features = List.of(features);
+    @Column(name = "rolename")
+    private String name;
+
+    public int getId() {
+        return id;
     }
 
-    public boolean hasFeature(Feature feature) {
-        return this.features.contains(feature);
+    public String getName() {
+        return name;
+    }
+
+    public Role(String name) {
+        this.name = name;
+    }
+
+    public Role(int id, String name) {
+        this.id = id;
+        this.name = name;
+    }
+
+    public Role() {
     }
 }

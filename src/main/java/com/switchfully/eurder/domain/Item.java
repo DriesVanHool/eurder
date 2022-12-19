@@ -1,26 +1,33 @@
 package com.switchfully.eurder.domain;
 
+import javax.persistence.*;
 import java.util.UUID;
 
+@Entity
+@Table(name = "item")
 public class Item {
-    private final String id;
-    private final String name;
-    private final String description;
-    private final double price;
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "item_seq")
+    @SequenceGenerator(name = "item_seq", sequenceName = "item_seq", allocationSize = 1)
+    private int id;
+    @Column(name = "itemname")
+    private String name;
+    @Column(name = "description")
+    private String description;
+    @Column(name = "price")
+    private double price;
+
+    @Column(name = "amount")
     private int amount;
+
+    @Transient
     private StockLvl stockLvl;
 
-    public Item(String name, String description, double price, int amount) {
-        this.id = UUID.randomUUID().toString();
-        this.name = name;
-        this.description = description;
-        this.price = price;
-        this.amount = amount;
+    public Item() {
         this.stockLvl = calculateStockLvl(amount);
     }
 
-    public Item(String id, String name, String description, double price, int amount) {
-        this.id = id;
+    public Item(String name, String description, double price, int amount) {
         this.name = name;
         this.description = description;
         this.price = price;
@@ -34,7 +41,7 @@ public class Item {
         return StockLvl.STOCK_HIGH;
     }
 
-    public String getId() {
+    public int getId() {
         return id;
     }
 
@@ -55,7 +62,7 @@ public class Item {
     }
 
     public StockLvl getStockLvl() {
-        return stockLvl;
+        return calculateStockLvl(this.amount);
     }
 
     public void setAmount(int amount) {
@@ -65,5 +72,17 @@ public class Item {
             this.amount = amount;
         }
         this.stockLvl = calculateStockLvl(this.amount);
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public void setPrice(double price) {
+        this.price = price;
     }
 }

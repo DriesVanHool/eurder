@@ -1,9 +1,6 @@
 package com.switchfully.eurder.api;
 
-import com.switchfully.eurder.domain.exceptions.InvallidInputException;
-import com.switchfully.eurder.domain.exceptions.UnknownUserException;
-import com.switchfully.eurder.domain.exceptions.WrongPasswordException;
-import com.switchfully.eurder.domain.exceptions.UnauthorizedException;
+import com.switchfully.eurder.domain.exceptions.*;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -55,6 +52,11 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(UnauthorizedException.class)
     protected void unauthorizedException(UnauthorizedException ex, HttpServletResponse response) throws IOException {
+        response.sendError(HttpStatus.FORBIDDEN.value(), ex.getMessage());
+    }
+
+    @ExceptionHandler(KeyCloakCreateException.class)
+    protected void keyCloakCreateException(KeyCloakCreateException ex, HttpServletResponse response) throws IOException {
         response.sendError(HttpStatus.FORBIDDEN.value(), ex.getMessage());
     }
 

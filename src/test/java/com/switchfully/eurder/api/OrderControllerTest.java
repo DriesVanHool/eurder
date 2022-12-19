@@ -52,7 +52,7 @@ class OrderControllerTest {
     private String defaultId;
     private String defaultPw;
 
-    @BeforeEach
+/*    @BeforeEach
     void initialize() {
         user = new User("10", "Test", "Tester", "test@test.com", "0123456789", new Adress("Street", "number", "City Name"), "pwd", Role.CUSTOMER);
         item1 = new Item("15", "Laptop", "To type on", 2000, 2);
@@ -68,8 +68,9 @@ class OrderControllerTest {
 
         defaultId = "10";
         defaultPw = "pwd";
-    }
+    }*/
 
+/*
     @Test
     void whenOrderingExistingItems() {
         items.save(item1);
@@ -191,6 +192,7 @@ class OrderControllerTest {
 
         assertEquals("No order found with id: 98", result.get("message"));
     }
+*/
 
     @AfterEach
     void clear() {

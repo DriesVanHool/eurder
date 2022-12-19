@@ -11,10 +11,14 @@ public record CreateUserDto(@NotBlank(message = "Firstname needs to be filled in
                             @Email(message = "Email is not valid")
                             @NotBlank(message = "Email needs to be filled in")
                             String email,
-                            @NotBlank(message = "Phonenumber needs to be filled in")
+                            @NotBlank(message = "Phone number needs to be filled in")
                             String phoneNumber,
-                            @NotNull(message = "Adress needs to be filled in")
-                            Adress adress,
+                            @NotBlank(message = "Street needs to be filled in")
+                            String street,
+                            @NotBlank(message = "House number needs to be filled in")
+                            String houseNumber,
+                            @NotBlank(message = "Zip needs to be filled in")
+                            String zip,
                             @NotBlank(message = "Password needs to be filled in")
                             String password) {
 }

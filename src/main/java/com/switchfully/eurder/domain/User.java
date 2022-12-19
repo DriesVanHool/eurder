@@ -3,22 +3,35 @@ package com.switchfully.eurder.domain;
 import com.switchfully.eurder.domain.security.Feature;
 import com.switchfully.eurder.domain.security.Role;
 
+import javax.persistence.*;
 import java.util.Objects;
 import java.util.UUID;
 
+@Entity
+@Table(name = "person")
 public class User {
-    private final String id;
-    private final String firstname;
-    private final String lastname;
-    private final String email;
-    private final String phoneNumber;
-    private final Adress adress;
-    private final String password;
-    private final Role role;
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "person_seq")
+    @SequenceGenerator(name = "person_seq", sequenceName = "person_seq", allocationSize = 1)
+    private int id;
 
-    public User(String firstname, String lastname, String email, String phoneNumber, Adress adress, String password, Role role) {
-        this.password = password;
-        this.id = UUID.randomUUID().toString();
+    @Column(name = "firstname")
+    private String firstname;
+    @Column(name = "lastname")
+    private String lastname;
+    @Column(name = "email")
+    private String email;
+    @Column(name = "phonenumber")
+    private String phoneNumber;
+
+    @Embedded
+    private Adress adress;
+
+    @ManyToOne
+    @JoinColumn(name = "roleid")
+    private Role role;
+
+    public User(String firstname, String lastname, String email, String phoneNumber, Adress adress, Role role) {
         this.firstname = firstname;
         this.lastname = lastname;
         this.email = email;
@@ -27,18 +40,10 @@ public class User {
         this.role = role;
     }
 
-    public User(String id, String firstname, String lastname, String email, String phoneNumber, Adress adress, String password, Role role) {
-        this.id = id;
-        this.firstname = firstname;
-        this.lastname = lastname;
-        this.email = email;
-        this.phoneNumber = phoneNumber;
-        this.adress = adress;
-        this.password = password;
-        this.role = role;
+    public User() {
     }
 
-    public String getId() {
+    public int getId() {
         return id;
     }
 
@@ -64,26 +69,5 @@ public class User {
 
     public Role getRole() {
         return role;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        User user = (User) o;
-        return Objects.equals(firstname, user.firstname) && Objects.equals(lastname, user.lastname) && Objects.equals(email, user.email) && Objects.equals(phoneNumber, user.phoneNumber) && Objects.equals(adress, user.adress);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(firstname, lastname, email, phoneNumber, adress);
-    }
-
-    public boolean doesPasswordMatch(String password) {
-        return this.password.equals(password);
-    }
-
-    public boolean hasAccessTo(Feature feature) {
-        return this.role.hasFeature(feature);
     }
 }

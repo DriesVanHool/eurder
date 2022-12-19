@@ -9,16 +9,19 @@ import com.switchfully.eurder.domain.repositories.ItemRepository;
 import com.switchfully.eurder.domain.repositories.OrderRepository;
 import com.switchfully.eurder.domain.repositories.UserRepository;
 import com.switchfully.eurder.services.mappers.ItemMapper;
+import org.springframework.security.core.Transient;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
+@Transactional
 public class ItemService {
 
-    ItemRepository itemRepository;
+ItemRepository itemRepository;
 
     OrderRepository orderRepository;
 
@@ -33,47 +36,49 @@ public class ItemService {
     }
 
     public ItemDto addItem(CreateItemDto createItemDto) throws InvallidInputException {
-        ArrayList<String> errors = validateUserInput(createItemDto);
-        if (errors.size() > 0) throw new InvallidInputException(errors);
         Item item = new Item(createItemDto.name(), createItemDto.description(), createItemDto.price(), createItemDto.amount());
         return itemMapper.toDto(itemRepository.save(item));
     }
 
     public ItemDto updateItem(String id, CreateItemDto createItemDto) throws InvallidInputException {
-        ArrayList<String> errors = validateUserInput(createItemDto);
-        if (validateItemId(id)) throw new NoSuchElementException("No item exists with id :" + id);
-        if (errors.size() > 0) throw new InvallidInputException(errors);
-        Item item = new Item(id, createItemDto.name(), createItemDto.description(), createItemDto.price(), createItemDto.amount());
-        return itemMapper.toDto(itemRepository.save(item));
+        Item item = itemRepository.getItemsById(validateItemId(id)).stream().findFirst().orElseThrow(()->new RuntimeException("Database inconsistency"));
+        item.setName(createItemDto.name());
+        item.setDescription(createItemDto.description());
+        item.setPrice(createItemDto.price());
+        item.setAmount(createItemDto.amount());
+        return itemMapper.toDto(item);
     }
 
-    public ArrayList<String> validateUserInput(CreateItemDto createItemDto) {
-        ArrayList<String> errors = new ArrayList<>();
-        if (createItemDto.name().isEmpty()) {
-            errors.add("name");
+    public int validateItemId(String id) {
+        int itemId;
+        try {
+            itemId = Integer.parseInt(id);
+        }catch (IllegalArgumentException ex){
+            throw new IllegalArgumentException("Invalid id");
         }
-        if (createItemDto.description().isEmpty()) {
-            errors.add("description");
-        }
-        if (createItemDto.price() < 0) {
-            errors.add("price");
-        }
-        if (createItemDto.amount() < 0) {
-            errors.add("amount");
-        }
-        return errors;
+        if (new ArrayList<>(itemRepository.getItemsById(itemId)).isEmpty()) throw new NoSuchElementException("No item exists with id :" + id);
+        return itemId;
     }
 
-    public boolean validateItemId(String id) {
-        return itemRepository.getItemById(id).isEmpty();
-    }
+
 
     public List<ItemDto> getAllItems() {
-        List<Item> itemsHighToLowSupply = itemRepository.getAllItems().stream().sorted(Comparator.comparing(Item::getAmount).reversed()).toList();
+        List<Item> itemsHighToLowSupply = itemRepository.findAll().stream().sorted(Comparator.comparing(Item::getAmount).reversed()).toList();
         return itemMapper.toDto(itemsHighToLowSupply);
     }
 
 
+    public List<ItemDto> getAllItemsBySupply(String supply) {
+        StockLvl lvl = switch (supply.toLowerCase()) {
+            case "low" -> StockLvl.STOCK_LOW;
+            case "medium" -> StockLvl.STOCK_MEDIUM;
+            case "high" -> StockLvl.STOCK_HIGH;
+            default -> throw new IllegalArgumentException("You can only filter on \"low\", \"medium\" or \"high\".");
+        };
+        return getAllItems().stream().filter(itemDto -> itemDto.stockLvl() == lvl).collect(Collectors.toList());
+    }
+
+/*
     public List<ItemShippingDto> getAllItemsToShipToday() {
         return getAllItemsToShip().stream().filter(itemShippingDto -> itemShippingDto.itemGroup().getShippingDate().equals(LocalDate.now())).toList();
     }
@@ -94,17 +99,5 @@ public class ItemService {
             }
         }
         return itemShippings;
-    }
-
-
-    public List<ItemDto> getAllItemsBySupply(String supply) {
-        StockLvl lvl = switch (supply.toLowerCase()) {
-            case "low" -> StockLvl.STOCK_LOW;
-            case "medium" -> StockLvl.STOCK_MEDIUM;
-            case "high" -> StockLvl.STOCK_HIGH;
-            default -> throw new IllegalArgumentException("You can only filter on \"low\", \"medium\" or \"high\".");
-        };
-        return getAllItems().stream().filter(itemDto -> itemDto.stockLvl() == lvl).collect(Collectors.toList());
-    }
-
+    }*/
 }

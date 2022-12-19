@@ -23,17 +23,7 @@ public class SecurityService {
     }
 
     public void validateAuthorisation(String authorization, Feature feature) throws RuntimeException {
-        UsernamePassword usernamePassword = getUseramePassword(authorization);
-        User user = repository.getUserById(usernamePassword.getUsername()).orElseThrow(UnknownUserException::new);
 
-        if (!user.doesPasswordMatch(usernamePassword.getPassword())) {
-            logger.info("Wrong password");
-            throw new WrongPasswordException();
-        }
-        if (!user.hasAccessTo(feature)) {
-            logger.info("This user doesn't have the correct role or access to features");
-            throw new UnauthorizedException();
-        }
 
     }
 

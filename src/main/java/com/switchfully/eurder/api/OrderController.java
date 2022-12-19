@@ -15,7 +15,7 @@ import java.util.List;
 @RestController
 @RequestMapping(path = "orders")
 public class OrderController {
-    SecurityService securityService;
+/*    SecurityService securityService;
     OrderService orderService;
 
     public OrderController(SecurityService securityService, OrderService orderService) {
@@ -41,5 +41,5 @@ public class OrderController {
     public OrderDto reorderOrder(@RequestHeader String authorization, @PathVariable String orderId) {
         securityService.validateAuthorisation(authorization, Feature.PLACE_ORDER);
         return orderService.reorderOrder(orderId, securityService.getUserId(authorization));
-    }
+    }*/
 }
