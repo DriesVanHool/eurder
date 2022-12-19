@@ -5,5 +5,5 @@ import com.switchfully.eurder.domain.ItemGroup;
 
 import java.util.List;
 
-public record ItemShippingDto(ItemGroup itemGroup, Adress adress) {
+public record ItemShippingDto(ItemGroupDto itemGroup, Adress adress) {
 }

@@ -12,18 +12,20 @@ import java.util.stream.Collectors;
 @Component
 public class ReportMapper {
 
+
     public OrderReportDto toDto(Order order) {
         double totalPrice = order.getItemGroups().stream().mapToDouble(orderGroup -> orderGroup.getBuyPrice() * orderGroup.getAmount()).sum();
 
         return new OrderReportDto(order.getId(), toDto(order.getItemGroups()), totalPrice);
     }
 
+
     public List<OrderReportDto> todDto(List<Order> orders) {
         return orders.stream().map(this::toDto).collect(Collectors.toList());
     }
 
     public ItemGroupReportDto toDto(ItemGroup itemGroup) {
-        return new ItemGroupReportDto(itemGroup.getItemName(), itemGroup.getAmount(), itemGroup.getBuyPrice() * itemGroup.getAmount());
+        return new ItemGroupReportDto(itemGroup.getItem().getName(), itemGroup.getAmount(), itemGroup.getBuyPrice() * itemGroup.getAmount());
 
     }
 

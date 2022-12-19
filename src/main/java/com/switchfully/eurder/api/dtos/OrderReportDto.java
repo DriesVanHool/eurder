@@ -2,5 +2,5 @@ package com.switchfully.eurder.api.dtos;
 
 import java.util.List;
 
-public record OrderReportDto(String id, List<ItemGroupReportDto> itemGroups, Double orderPrice) {
+public record OrderReportDto(int id, List<ItemGroupReportDto> itemGroups, Double orderPrice) {
 }

@@ -2,14 +2,15 @@ package com.switchfully.eurder.api;
 
 import com.switchfully.eurder.api.dtos.ItemDto;
 import com.switchfully.eurder.api.dtos.ItemShippingDto;
+import com.switchfully.eurder.api.dtos.OrderDto;
 import com.switchfully.eurder.domain.*;
-import com.switchfully.eurder.domain.repositories.ItemRepository;
-import com.switchfully.eurder.domain.repositories.OrderRepository;
-import com.switchfully.eurder.domain.repositories.UserRepository;
+import com.switchfully.eurder.domain.repositories.*;
 import com.switchfully.eurder.domain.security.Role;
+import com.switchfully.eurder.services.ItemService;
 import io.restassured.RestAssured;
 import io.restassured.common.mapper.TypeRef;
 import net.minidev.json.JSONObject;
+import org.aspectj.lang.annotation.Before;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -20,7 +21,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.annotation.DirtiesContext;
 
+import javax.transaction.Transactional;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -41,14 +44,26 @@ class ItemControllerTest {
 
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private CityRepository cityRepository;
+    @Autowired
+    private RoleRepository roleRepository;
+    @Autowired
+    private ItemGroupRepository itemGroupRepository;
+    @Autowired
+    private ItemService itemService;
 
     String adminToken;
+    String customerToken;
     String secret = "HhEMkchwPljhhzs6osa4nlb8GWiZiJoE";
     String clientId = "eurder-dries";
     String serverUrl = "https://keycloak.switchfully.com/auth/realms/java-oct-2022";
 
     @BeforeEach
     void initTestToken() {
+
+        cityRepository.save(new City("2000", "Antwerpen"));
+        roleRepository.save(new Role("CUSTOMER"));
         adminToken = RestAssured.given()
                 .auth()
                 .preemptive()
@@ -56,6 +71,16 @@ class ItemControllerTest {
                 .header("Content-Type", "application/x-www-form-urlencoded")
                 .baseUri(serverUrl)
                 .body("username=admin&password=pwd&grant_type=password")
+                .post("/protocol/openid-connect/token")
+                .then().extract().response().jsonPath().getString("access_token");
+
+        customerToken = RestAssured.given()
+                .auth()
+                .preemptive()
+                .basic(clientId, secret)
+                .header("Content-Type", "application/x-www-form-urlencoded")
+                .baseUri(serverUrl)
+                .body("username=customer@gmail.com&password=pwd&grant_type=password")
                 .post("/protocol/openid-connect/token")
                 .then().extract().response().jsonPath().getString("access_token");
 
@@ -177,24 +202,46 @@ class ItemControllerTest {
     }
 
 
-/*    @Test
+    @Test
     void getAllItemsToShippToday() {
-        userRepository.save(new User("Test", "Tester", "test@test.com", "0123456789", new Adress("straat", "nummer", new City("2000", "Antwerpen")), new Role(1, "CUSTOMER")));
+        customerToken = RestAssured.given()
+                .auth()
+                .preemptive()
+                .basic(clientId, secret)
+                .header("Content-Type", "application/x-www-form-urlencoded")
+                .baseUri(serverUrl)
+                .body("username=customer@gmail.com&password=pwd&grant_type=password")
+                .post("/protocol/openid-connect/token")
+                .then().extract().response().jsonPath().getString("access_token");
+
+        User user = userRepository.save(new User("Test", "Tester", "customer@gmail.com", "0123456789", new Adress("straat", "nummer", new City("2000", "Antwerpen")), new Role(1, "CUSTOMER")));
         Item itemNotToShip = items.save(new Item("Laptop", "To type on", 3000, 2));
         Item itemToShip = items.save(new Item("Phone", "For calling", 2000, 12));
+        List<JSONObject> order = new ArrayList<>();
+        JSONObject jsonItem1 = new JSONObject();
+        JSONObject jsonItem2 = new JSONObject();
+        jsonItem1.put("itemId", "1");
+        jsonItem1.put("amount", "2");
+        jsonItem2.put("itemId", "2");
+        jsonItem2.put("amount", "1");
+        order.add(jsonItem1);
+        order.add(jsonItem2);
 
-        ItemGroup itemGroup1 = new ItemGroup(itemNotToShip.getId(), itemNotToShip.getName(), 2, itemNotToShip.getPrice(), LocalDate.now().plusDays(7));
-        ItemGroup itemGroup2 = new ItemGroup(itemToShip.getId(), itemToShip.getName(), 1, itemToShip.getPrice(), LocalDate.now());
-        orders.save(new Order("11", List.of(itemGroup1, itemGroup2)));
+        OrderDto placedOrder = RestAssured.given().port(port).header("authorization", "bearer " + customerToken).log().all().contentType("application/json")
+                .body(order)
+                .when().post("orders")
+                .then().statusCode(201).extract().body().as(OrderDto.class);
 
 
-        List<ItemShippingDto> result = RestAssured.given().port(port).auth().preemptive().basic("1", "pwd").contentType("application/json")
+        itemService.setItemGroupDateToday(2);
+
+        List<ItemShippingDto> result = RestAssured.given().port(port).header("authorization", "bearer " + adminToken).log().all().contentType("application/json")
                 .when().get("stock/shipToday")
                 .then().statusCode(200).and().extract().as(new TypeRef<List<ItemShippingDto>>() {
                 });
 
         assertEquals(1, result.size());
-        assertEquals(result.get(0).itemGroup().getItemId(), itemToShip.getId());
-    }*/
+        assertEquals(result.get(0).itemGroup().itemId(), itemToShip.getId());
+    }
 
 }

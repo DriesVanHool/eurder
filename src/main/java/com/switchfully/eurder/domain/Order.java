@@ -1,26 +1,47 @@
 package com.switchfully.eurder.domain;
 
+import javax.persistence.*;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
-
+@Entity
+@Table(name = "orderline")
 public class Order {
-    private final String id;
-    private final String customerId;
-    private final List<ItemGroup> itemGroups;
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "order_seq")
+    @SequenceGenerator(name = "order_seq", sequenceName = "order_seq", allocationSize = 1)
+    private int id;
+    @ManyToOne
+    @JoinColumn(name = "personid")
+    private User user;
 
-    public Order(String customerId, List<ItemGroup> orderGroups) {
-        this.id = UUID.randomUUID().toString();
-        this.customerId = customerId;
-        this.itemGroups = orderGroups;
+    @Column(name = "orderdate")
+    private LocalDate orderdate;
+
+    @OneToMany
+    @JoinColumn(name = "orderid")
+    private List<ItemGroup> itemGroups;
+
+    public Order(User user, List<ItemGroup> itemGroups) {
+        this.user = user;
+        this.itemGroups = itemGroups;
+        this.orderdate = LocalDate.now();
     }
 
-    public Order(String id, String customerId, List<ItemGroup> itemGroups) {
-        this.id = id;
-        this.customerId = customerId;
+    public void setItemGroups(List<ItemGroup> itemGroups) {
         this.itemGroups = itemGroups;
     }
 
-    public String getId() {
+    public Order(User user) {
+        this.user = user;
+        this.orderdate = LocalDate.now();
+    }
+
+    public Order() {
+        this.orderdate = LocalDate.now();
+    }
+
+    public int getId() {
         return id;
     }
 
@@ -28,7 +49,11 @@ public class Order {
         return itemGroups;
     }
 
-    public String getCustomerId() {
-        return customerId;
+    public User getUser() {
+        return user;
+    }
+
+    public LocalDate getOrderdate() {
+        return orderdate;
     }
 }

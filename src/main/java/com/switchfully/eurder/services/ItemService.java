@@ -2,9 +2,11 @@ package com.switchfully.eurder.services;
 
 import com.switchfully.eurder.api.dtos.CreateItemDto;
 import com.switchfully.eurder.api.dtos.ItemDto;
+import com.switchfully.eurder.api.dtos.ItemGroupDto;
 import com.switchfully.eurder.api.dtos.ItemShippingDto;
 import com.switchfully.eurder.domain.*;
 import com.switchfully.eurder.domain.exceptions.InvallidInputException;
+import com.switchfully.eurder.domain.repositories.ItemGroupRepository;
 import com.switchfully.eurder.domain.repositories.ItemRepository;
 import com.switchfully.eurder.domain.repositories.OrderRepository;
 import com.switchfully.eurder.domain.repositories.UserRepository;
@@ -26,13 +28,16 @@ ItemRepository itemRepository;
     OrderRepository orderRepository;
 
     UserRepository userRepository;
+
+    ItemGroupRepository itemGroupRepository;
     ItemMapper itemMapper;
 
-    public ItemService(ItemRepository itemRepository, OrderRepository orderRepository, UserRepository userRepository, ItemMapper itemMapper) {
+    public ItemService(ItemRepository itemRepository, OrderRepository orderRepository, UserRepository userRepository, ItemMapper itemMapper, ItemGroupRepository itemGroupRepository) {
         this.itemRepository = itemRepository;
         this.orderRepository = orderRepository;
         this.userRepository = userRepository;
         this.itemMapper = itemMapper;
+        this.itemGroupRepository = itemGroupRepository;
     }
 
     public ItemDto addItem(CreateItemDto createItemDto) throws InvallidInputException {
@@ -78,16 +83,16 @@ ItemRepository itemRepository;
         return getAllItems().stream().filter(itemDto -> itemDto.stockLvl() == lvl).collect(Collectors.toList());
     }
 
-/*
+
     public List<ItemShippingDto> getAllItemsToShipToday() {
-        return getAllItemsToShip().stream().filter(itemShippingDto -> itemShippingDto.itemGroup().getShippingDate().equals(LocalDate.now())).toList();
+        return getAllItemsToShip().stream().filter(itemShippingDto -> itemShippingDto.itemGroup().shippingDate().equals(LocalDate.now())).toList();
     }
 
     public List<ItemShippingDto> getAllItemsToShip() {
         List<ItemShippingDto> itemShippings = new ArrayList<>();
 
-        for (Order order : orderRepository.getOrders()) {
-            Optional<User> user = userRepository.getUserById(order.getCustomerId());
+        for (Order order : orderRepository.findAll()) {
+            Optional<User> user = userRepository.getUsersById(order.getUser().getId()).stream().findFirst();
             Adress adress;
             if (user.isEmpty()) {
                 adress = null;
@@ -95,9 +100,16 @@ ItemRepository itemRepository;
                 adress = user.get().getAdress();
             }
             for (ItemGroup itemGroup : order.getItemGroups()) {
-                itemShippings.add(new ItemShippingDto(itemGroup, adress));
+                ItemGroupDto itemGroupDto = new ItemGroupDto(itemGroup.getItem().getId(), itemGroup.getAmount(), itemGroup.getShippingDate(), itemGroup.getBuyPrice());
+                itemShippings.add(new ItemShippingDto(itemGroupDto, adress));
             }
         }
         return itemShippings;
-    }*/
+    }
+
+    //TODO voor test?
+    public void setItemGroupDateToday(int id){
+        ItemGroup itemGroup = itemGroupRepository.getItemGroupsById(id).stream().findFirst().orElseThrow(()-> new RuntimeException("Database inconcitency"));
+        itemGroup.setShippingDate(LocalDate.now());
+    }
 }

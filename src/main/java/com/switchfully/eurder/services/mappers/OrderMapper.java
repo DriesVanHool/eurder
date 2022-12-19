@@ -12,7 +12,7 @@ import java.util.List;
 public class OrderMapper {
 
     public ItemGroupDto toDto(ItemGroup itemGroup) {
-        return new ItemGroupDto(itemGroup.getItemId(), itemGroup.getAmount(), itemGroup.getShippingDate(), itemGroup.getBuyPrice());
+        return new ItemGroupDto(itemGroup.getItem().getId(), itemGroup.getAmount(), itemGroup.getShippingDate(), itemGroup.getBuyPrice());
     }
 
     public List<ItemGroupDto> toDTO(List<ItemGroup> itemGroups) {
