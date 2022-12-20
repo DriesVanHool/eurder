@@ -35,9 +35,10 @@ public class OrderController {
         return orderService.getOrderReport(authorization);
     }
 
-/*    @PostMapping(path = "{orderId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(path = "{orderId}", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
-    public OrderDto reorderOrder(@RequestHeader String authorization, @PathVariable String orderId) {
-        return orderService.reorderOrder(orderId, securityService.getUserId(authorization));
-    }*/
+    @PreAuthorize("hasAuthority('CUSTOMER')")
+    public OrderDto reorderOrder(@RequestHeader String authorization, @PathVariable String orderId) throws ParseException{
+        return orderService.reorderOrder(orderId, authorization);
+    }
 }

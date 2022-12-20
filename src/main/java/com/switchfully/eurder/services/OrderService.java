@@ -57,12 +57,14 @@ public class OrderService {
         LocalDate shippingDate;
 
         for (CreateItemGroupDto groupItem : createItemGroupDtos) {
+            int itemId = checkInt(groupItem.itemId());
+            int itemAmount = checkInt(groupItem.amount());
             shippingDate = LocalDate.now().plusDays(1);
-            Item item = itemRepository.getItemsById(groupItem.itemId()).stream().findFirst().orElseThrow(() -> new NoSuchElementException("No item exists with id :" + groupItem.itemId()));
-            item.setAmount(item.getAmount() - groupItem.amount());
+            Item item = itemRepository.getItemsById(itemId).stream().findFirst().orElseThrow(() -> new NoSuchElementException("No item exists with id :" + groupItem.itemId()));
+            item.setAmount(item.getAmount() - itemAmount);
             if (item.getAmount() == 0) shippingDate = LocalDate.now().plusDays(DAYS_TO_ADD);
 
-            itemGroups.add(itemGroupRepository.save(new ItemGroup(item, order, groupItem.amount(), item.getPrice(), shippingDate)));
+            itemGroups.add(itemGroupRepository.save(new ItemGroup(item, order, itemAmount, item.getPrice(), shippingDate)));
         }
 
         return itemGroups;
@@ -81,18 +83,33 @@ public class OrderService {
     public List<Order> getOrdersByUserId(int id) {
         return orderRepository.findAll().stream().filter(order -> order.getUser().getId()== id).toList();
     }
-/*
-    public OrderDto reorderOrder(String orderId, String userId) throws RuntimeException {
-        Order order = orderRepository.getOrderById(orderId).orElseThrow(() -> new NoSuchElementException("No order found with id: " + orderId));
-        if (!order.getCustomerId().equals(userId))
-            throw new UnauthorizedException();
+
+    public OrderDto reorderOrder(String orderId, String authorization) throws ParseException, UnauthorizedException {
+        String emailToken = TokenDecoder.tokenDecode(authorization);
+        User user =  userRepository.getUserByEmail(emailToken).stream().findFirst().orElseThrow(UnauthorizedException::new);
+
+        int id = checkInt(orderId);
+
+        Order order = orderRepository.getOrderById(id).stream().findFirst().orElseThrow(() -> new NoSuchElementException("No order found with id: " + orderId));
+        if (!order.getUser().getEmail().equals(user.getEmail()))
+        {
+            throw new IllegalArgumentException("This is not your order");
+        }
         List<CreateItemGroupDto> createItemGroupDtos = new ArrayList<>();
         for (ItemGroup itemGroup : order.getItemGroups()) {
-            createItemGroupDtos.add(new CreateItemGroupDto(itemGroup.getItemId(), itemGroup.getAmount()));
+            createItemGroupDtos.add(new CreateItemGroupDto(String.valueOf(itemGroup.getItem().getId()), String.valueOf(itemGroup.getAmount())));
         }
-        return placeOrder(createItemGroupDtos, userId);
-
+        return placeOrder(createItemGroupDtos, authorization);
     }
 
-*/
+    public int checkInt(String intToCheck){
+        int id;
+
+        try {
+            id = Integer.parseInt(intToCheck);
+        }catch (IllegalArgumentException ex){
+            throw new IllegalArgumentException("Invalid int value");
+        }
+        return id;
+    }
 }

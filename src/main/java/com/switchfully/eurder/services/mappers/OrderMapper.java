@@ -20,6 +20,7 @@ public class OrderMapper {
     }
 
     public OrderDto toDto(Order order) {
+        //return items.stream().reduce(0.0, (acc, item) -> acc + item.getAmount() * item.getPrice(), Double::sum);
         double totalPrice = order.getItemGroups().stream().mapToDouble(orderGroup -> orderGroup.getBuyPrice() * orderGroup.getAmount()).sum();
         return new OrderDto(totalPrice, toDTO(order.getItemGroups()));
     }
