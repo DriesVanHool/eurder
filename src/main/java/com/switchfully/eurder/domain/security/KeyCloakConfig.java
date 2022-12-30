@@ -4,18 +4,30 @@ import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.keycloak.OAuth2Constants;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;
-import org.springframework.beans.factory.annotation.Value;
+
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.Properties;
 
 public class KeyCloakConfig {
+    static Properties prop;
 
+    static {
+        try {
+            prop = readPropertiesFile("env.properties");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     static Keycloak keycloak = null;
-    final static String serverUrl = "https://keycloak.switchfully.com/auth/";
-    public final static String realm = "java-oct-2022";
-    final static String clientId = "eurder-dries";
-    private static String clientSecret = "HhEMkchwPljhhzs6osa4nlb8GWiZiJoE";
-    final static String userName =  "admin";
-    final static String password = "pwd";
+    final static String serverUrl = prop.getProperty("KEYCLOAK_SERVER");
+    public final static String realm = prop.getProperty("KEYCLOAK_REALM");
+    final static String clientId =  prop.getProperty("KEYCLOAK_CLIENT");
+    private static String clientSecret = prop.getProperty("KEYCLOAK_SECRET");
+    final static String userName =  prop.getProperty("ADMIN_NAME");
+    final static String password = prop.getProperty("ADMIN_PWD");
 
 
 
@@ -37,5 +49,22 @@ public class KeyCloakConfig {
                     .build();
         }
         return keycloak;
+    }
+
+    public static Properties readPropertiesFile(String fileName) throws IOException {
+        FileInputStream fis = null;
+        Properties prop = null;
+        try {
+            fis = new FileInputStream(fileName);
+            prop = new Properties();
+            prop.load(fis);
+        } catch(FileNotFoundException fnfe) {
+            fnfe.printStackTrace();
+        } catch(IOException ioe) {
+            ioe.printStackTrace();
+        } finally {
+            fis.close();
+        }
+        return prop;
     }
 }
